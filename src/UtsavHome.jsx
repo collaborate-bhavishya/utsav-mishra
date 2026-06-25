@@ -42,7 +42,7 @@ const css = `
     backdrop-filter: blur(10px);
     box-shadow: 0 1px 0 var(--line);
   }
-  .nav-logo { font-family: 'Fraunces', serif; font-size: 19px; color: var(--ink); }
+  .nav-logo { font-family: 'Fraunces', serif; font-size: 19px; color: var(--ink); z-index: 110; }
   .nav-links { display: flex; gap: 32px; }
   .nav-links a { font-size: 14px; font-weight: 500; color: var(--ink); opacity: 0.6; transition: opacity 0.2s; }
   .nav-links a:hover { opacity: 1; }
@@ -51,7 +51,58 @@ const css = `
     border: 1.5px solid var(--ink); color: var(--ink); background: transparent; transition: all 0.2s;
   }
   .nav-cta:hover { background: var(--clay); border-color: var(--clay); color: #fff; }
-  @media (max-width: 760px) { .nav-links { display: none; } }
+  
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--ink);
+    cursor: pointer;
+    z-index: 110;
+  }
+  .nav-mobile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: var(--paper);
+    z-index: 105;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav-mobile-overlay.open {
+    transform: translateY(0);
+  }
+  .nav-mobile-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+  }
+  .nav-mobile-links a {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    color: var(--ink);
+    opacity: 0.8;
+  }
+  .nav-mobile-cta {
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 28px;
+    border-radius: 100px;
+    background: var(--clay);
+    color: #fff;
+    border: none;
+    margin-top: 16px;
+  }
+  @media (max-width: 760px) {
+    .nav-links, .nav-cta { display: none; }
+    .nav-toggle { display: block; }
+  }
 
   /* HERO — warm pastel split */
   .hero {
@@ -213,7 +264,7 @@ const css = `
   }
 
   /* WHY */
-  .why-inner { display: grid; grid-template-columns: 1fr 1.35fr; gap: 80px; align-items: start; }
+  .why-inner { display: grid; grid-template-columns: 1fr 1.35fr; gap: 80px; align-items: center; }
   @media (max-width: 860px) { .why-inner { grid-template-columns: 1fr; gap: 40px; } }
   .why-left h2 { font-family: 'Fraunces', serif; font-size: clamp(28px,3.5vw,44px); font-weight: 400; line-height: 1.15; margin-top: 14px; color: var(--paper); }
   .why-photo { margin-top: 40px; border-radius: 4px; overflow: hidden; height: 300px; }
@@ -222,12 +273,16 @@ const css = `
   .why-body p:last-child { margin-bottom: 0; }
 
   /* CREDENTIALS */
-  .creds-inner { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; }
-  .cred { text-align: center; padding: 28px 44px; border-right: 1px solid rgba(26,36,32,0.13); }
+  .creds-inner { display: grid; grid-template-columns: repeat(4, 1fr); align-items: start; justify-content: center; }
+  .cred { text-align: center; padding: 28px 44px; border-right: 1px solid rgba(26,36,32,0.13); display: flex; flex-direction: column; justify-content: flex-start; }
   .cred:last-child { border-right: none; }
-  @media (max-width: 640px) { .cred { width: 50%; border-right: none; padding: 20px 16px; } }
   .cred-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; margin-bottom: 6px; }
   .cred-sub { font-size: 13px; color: var(--sage); }
+  @media (max-width: 760px) {
+    .creds-inner { grid-template-columns: repeat(2, 1fr); gap: 24px 16px; }
+    .cred { border-right: none; padding: 0; }
+    .cred-title { min-height: 48px; display: flex; align-items: center; justify-content: center; }
+  }
 
   /* REFLECTIONS */
   .ref-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 52px; }
@@ -311,13 +366,18 @@ const creds = [
 
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
+  
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <nav className={`nav${scrolled ? " scrolled" : ""}`}>
+    <nav className={`nav${scrolled ? " scrolled" : ""}${menuOpen ? " menu-active" : ""}`}>
       <div className="nav-logo serif">Utsav Mishra</div>
       <div className="nav-links">
         <a href="#services">Work</a>
@@ -325,7 +385,25 @@ function Nav() {
         <a href="#reflections">Reflections</a>
         <a href="#contact">Contact</a>
       </div>
-      <button className="nav-cta" onClick={() => document.getElementById("contact").scrollIntoView({behavior:"smooth"})}>Start a conversation</button>
+      <button className="nav-cta" onClick={() => { closeMenu(); document.getElementById("contact").scrollIntoView({behavior:"smooth"}); }}>Start a conversation</button>
+      
+      <button className="nav-toggle" onClick={toggleMenu} aria-label="Toggle menu">
+        {menuOpen ? (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        ) : (
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        )}
+      </button>
+
+      <div className={`nav-mobile-overlay${menuOpen ? " open" : ""}`}>
+        <div className="nav-mobile-links">
+          <a href="#services" onClick={closeMenu}>Work</a>
+          <a href="#why" onClick={closeMenu}>About</a>
+          <a href="#reflections" onClick={closeMenu}>Reflections</a>
+          <a href="#contact" onClick={closeMenu}>Contact</a>
+          <button className="nav-mobile-cta" onClick={() => { closeMenu(); document.getElementById("contact").scrollIntoView({behavior:"smooth"}); }}>Start a conversation</button>
+        </div>
+      </div>
     </nav>
   );
 }
@@ -600,7 +678,7 @@ function Contact() {
             <h2 className="serif">Tell me a little about where you are.</h2>
             <p>No form designed to qualify you — just a short note on what's on your mind. I read every message personally.</p>
             <div className="contact-photo">
-              <img src="https://images.unsplash.com/photo-1556157382-97eda2f9e2bf?q=80&w=800&auto=format&fit=crop" alt="Utsav in conversation" />
+              <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=800&auto=format&fit=crop" alt="Utsav in conversation" />
             </div>
           </div>
           <div className="form-card">
