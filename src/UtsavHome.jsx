@@ -106,7 +106,7 @@ const css = `
 
   /* HERO — warm pastel split */
   .hero {
-    min-height: 100vh;
+    min-height: 80vh;
     display: grid;
     grid-template-columns: 1fr 1fr;
     background: var(--hero-l);
@@ -129,10 +129,10 @@ const css = `
 
   .hero-left {
     display: flex; flex-direction: column; justify-content: center;
-    padding: 140px 48px 80px 60px;
+    padding: 110px 48px 60px 60px;
   }
-  @media (max-width: 1100px) { .hero-left { padding: 130px 36px 80px 40px; } }
-  @media (max-width: 860px) { .hero-left { padding: 110px 24px 48px; } }
+  @media (max-width: 1100px) { .hero-left { padding: 100px 36px 60px 40px; } }
+  @media (max-width: 860px) { .hero-left { padding: 90px 24px 40px; } }
 
   .hero-left .eyebrow { margin-bottom: 22px; }
 
@@ -180,9 +180,9 @@ const css = `
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    padding: 100px 32px 40px;
+    padding: 90px 32px 40px;
   }
-  @media (max-width: 860px) { .hero-right { padding: 32px 24px 40px; } }
+  @media (max-width: 860px) { .hero-right { padding: 24px 24px 32px; } }
 
   .hero-portrait {
     position: relative; z-index: 1;
