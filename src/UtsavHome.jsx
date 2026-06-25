@@ -128,8 +128,8 @@ const css = `
   }
 
   .hero-left {
-    display: flex; flex-direction: column; justify-content: center;
-    padding: 110px 48px 60px 60px;
+    display: flex; flex-direction: column; justify-content: flex-start;
+    padding: 130px 48px 60px 60px;
   }
   @media (max-width: 1100px) { .hero-left { padding: 100px 36px 60px 40px; } }
   @media (max-width: 860px) { .hero-left { padding: 90px 24px 40px; } }
@@ -177,10 +177,10 @@ const css = `
     position: relative;
     background: var(--hero-l);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     overflow: hidden;
-    padding: 90px 32px 40px;
+    padding: 110px 32px 40px;
   }
   @media (max-width: 860px) { .hero-right { padding: 24px 24px 32px; } }
 
@@ -191,9 +191,14 @@ const css = `
     height: auto;
     display: block;
     border-radius: 4px;
+    margin-top: -110px; /* Pull Utsav's head up to remove the empty space inside the PNG */
   }
   @media (max-width: 860px) {
-    .hero-portrait { width: 55%; max-width: 240px; }
+    .hero-portrait {
+      width: 55%;
+      max-width: 240px;
+      margin-top: -50px; /* Pull it up on mobile to reduce gap */
+    }
   }
 
   /* LOGOS */
