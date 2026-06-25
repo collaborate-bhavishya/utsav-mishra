@@ -187,11 +187,12 @@ const css = `
   .hero-portrait {
     position: relative; z-index: 1;
     width: 90%;
-    max-width: 400px;
+    max-width: 520px;
     height: auto;
     display: block;
     border-radius: 4px;
-    margin-top: -110px; /* Pull Utsav's head up to remove the empty space inside the PNG */
+    margin-top: -312px; /* Pull Utsav's head up to align exactly with the top of the text block */
+    margin-bottom: -312px; /* Offset negative top margin */
   }
   @media (max-width: 860px) {
     .hero-portrait {
