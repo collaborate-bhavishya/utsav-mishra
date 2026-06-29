@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 
-const HERO_IMG = "/utsav-hero_2.png";
+const HERO_IMG = "/utsav-hero.png";
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap');
@@ -27,16 +27,35 @@ const css = `
   .um img { display: block; max-width: 100%; }
   .serif { font-family: 'Fraunces', serif; }
   .eyebrow { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sage); }
+  .section-eyebrow {
+    display: inline-block;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--clay);
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--clay);
+  }
+  .section-h2 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(28px, 3.5vw, 44px);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.005em;
+    margin-top: 18px;
+  }
   .wrap { max-width: var(--max); margin: 0 auto; padding: 0 36px; }
   @media (max-width: 600px) { .wrap { padding: 0 20px; } }
 
   /* NAV */
   .nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    padding: 20px 36px;
+    padding: 16px 36px;
     display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
     transition: background 0.35s, box-shadow 0.35s;
   }
+  @media (max-width: 1024px) { .nav { padding: 14px 24px; } }
+  @media (max-width: 760px)  { .nav { padding: 14px 20px; } }
   .nav.scrolled {
     background: rgba(247,243,238,0.96);
     backdrop-filter: blur(10px);
@@ -56,9 +75,13 @@ const css = `
   .nav-links a:hover { opacity: 1; }
   .nav-cta {
     font-size: 13px; font-weight: 600; padding: 10px 22px; border-radius: 100px;
-    border: 1.5px solid var(--ink); color: var(--ink); background: transparent; transition: all 0.2s;
+    border: 1.5px solid var(--ink); color: var(--ink); background: transparent;
+    white-space: nowrap; flex-shrink: 0;
+    transition: all 0.2s;
   }
   .nav-cta:hover { background: var(--clay); border-color: var(--clay); color: #fff; }
+  @media (max-width: 1024px) { .nav-cta { padding: 9px 18px; font-size: 12px; } .nav-links { gap: 24px; } }
+  @media (max-width: 900px)  { .nav-cta { padding: 8px 14px; font-size: 11.5px; } .nav-links { gap: 18px; } }
   
   .nav-toggle {
     display: none;
@@ -158,10 +181,13 @@ const css = `
 
   .hero-h1 {
     font-family: 'Fraunces', serif;
-    font-size: clamp(36px, 4.4vw, 56px);
+    font-size: clamp(34px, 4.2vw, 54px);
     font-weight: 400; line-height: 1.1; letter-spacing: -0.01em;
     color: var(--ink); margin-bottom: 26px;
+    display: flex; flex-direction: column;
   }
+  .hero-h1-line { display: block; white-space: nowrap; }
+  @media (max-width: 860px) { .hero-h1 { font-size: clamp(30px, 7vw, 44px); } .hero-h1-line { white-space: normal; } }
 
   .hero-body {
     font-size: 16px; color: var(--sage);
@@ -207,8 +233,19 @@ const css = `
 
   /* LOGOS */
   .logos { padding: 44px 0; background: var(--sand); border-bottom: 1px solid var(--line); }
-  .logos .eyebrow { text-align: center; margin-bottom: 28px; }
-  .logos-row { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .logos .section-eyebrow { display: block; text-align: center; margin: 0 auto 28px; }
+  .logos-row { display: flex; align-items: center; justify-content: center; gap: 32px; flex-wrap: wrap; }
+  .logo-item {
+    height: 44px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-item img {
+    max-height: 38px; width: auto; max-width: 130px;
+    object-fit: contain;
+    filter: grayscale(1) brightness(0.6); opacity: 0.75;
+    transition: filter 0.2s, opacity 0.2s;
+  }
+  .logo-item:hover img { filter: grayscale(0) brightness(1); opacity: 1; }
   .logo-pill {
     background: rgba(26,36,32,0.06); border-radius: 3px; padding: 11px 22px;
     font-family: 'Fraunces', serif; font-size: 14px; color: var(--sage);
@@ -264,26 +301,25 @@ const css = `
     min-height: 360px;
   }
   .testi-pro-left {
-    position: relative;
     background: var(--sand);
-    overflow: hidden;
+    padding: 32px 28px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    gap: 18px;
     min-height: 360px;
   }
   .testi-pro-avatar {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
+    width: 140px; height: 140px;
+    border-radius: 50%;
     object-fit: cover;
+    background: #fff;
+    border: 3px solid #fff;
+    box-shadow: 0 6px 20px rgba(26,36,32,0.10);
     display: block;
   }
-  .testi-pro-overlay {
-    position: absolute; left: 0; right: 0; bottom: 0;
-    padding: 60px 24px 22px;
-    background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0) 100%);
-    color: #fff;
-    text-align: left;
-  }
-  .testi-pro-name { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; color: #fff; line-height: 1.25; }
-  .testi-pro-role { font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 600; letter-spacing: 0.03em; margin-top: 4px; }
+  .testi-pro-name { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 500; color: var(--ink); line-height: 1.25; }
+  .testi-pro-role { font-size: 13px; color: var(--clay); font-weight: 600; letter-spacing: 0.03em; margin-top: 4px; }
   .testi-pro-right {
     padding: 44px;
     display: flex; flex-direction: column; justify-content: center; gap: 16px;
@@ -326,21 +362,31 @@ const css = `
     padding-bottom: 6px;
     border-bottom: 2px solid var(--clay);
   }
-  .why-photo { margin-top: 40px; border-radius: 4px; overflow: hidden; height: 300px; }
-  .why-photo img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.72) brightness(0.85); }
+  .why-photo { margin-top: 56px; border-radius: 4px; overflow: hidden; height: 360px; }
+  .why-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 12%; filter: saturate(0.72) brightness(0.92); }
   .why-body p { font-size: 17px; line-height: 1.78; color: rgba(247,243,238,0.68); margin-bottom: 22px; }
   .why-body p:last-child { margin-bottom: 0; }
 
   /* CREDENTIALS */
-  .creds-inner { display: grid; grid-template-columns: repeat(4, 1fr); align-items: start; justify-content: center; }
-  .cred { text-align: center; padding: 28px 44px; border-right: 1px solid rgba(26,36,32,0.13); display: flex; flex-direction: column; justify-content: flex-start; }
+  .creds-inner { display: grid; grid-template-columns: repeat(4, 1fr); align-items: stretch; justify-content: center; gap: 0; }
+  .cred {
+    text-align: center; padding: 28px 28px;
+    border-right: 1px solid rgba(26,36,32,0.13);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
   .cred:last-child { border-right: none; }
-  .cred-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; margin-bottom: 6px; }
+  .cred-logo {
+    height: 64px; width: 100%;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 8px;
+  }
+  .cred-logo img { max-height: 56px; max-width: 130px; width: auto; object-fit: contain; }
+  .cred-logo svg { max-height: 56px; max-width: 130px; width: auto; height: 56px; color: var(--clay); }
+  .cred-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 500; line-height: 1.25; }
   .cred-sub { font-size: 13px; color: var(--sage); }
   @media (max-width: 760px) {
-    .creds-inner { grid-template-columns: repeat(2, 1fr); gap: 24px 16px; }
+    .creds-inner { grid-template-columns: repeat(2, 1fr); gap: 28px 16px; }
     .cred { border-right: none; padding: 0; }
-    .cred-title { min-height: 48px; display: flex; align-items: center; justify-content: center; }
   }
 
   /* REFLECTIONS */
@@ -360,7 +406,7 @@ const css = `
   .newsletter { background: #232E29; padding: 80px 0; }
   .nl-inner { max-width: 560px; margin: 0 auto; text-align: center; }
   .nl-inner .eyebrow { color: rgba(247,243,238,0.38); margin-bottom: 20px; }
-  .nl-inner h2 { font-family: 'Fraunces', serif; font-size: clamp(24px,3vw,34px); font-weight: 400; color: var(--paper); line-height: 1.25; margin-bottom: 14px; }
+  .nl-inner h2 { font-family: 'Fraunces', serif; font-size: clamp(28px,3.5vw,44px); font-weight: 400; color: var(--paper); line-height: 1.15; margin: 18px 0 14px; }
   .nl-inner p { color: rgba(247,243,238,0.58); font-size: 16px; margin-bottom: 36px; }
   .nl-form { display: flex; gap: 10px; max-width: 440px; margin: 0 auto; }
   @media (max-width: 480px) { .nl-form { flex-direction: column; } }
@@ -370,12 +416,10 @@ const css = `
   .nl-done { color: rgba(247,243,238,0.7); font-size: 15px; margin-top: 16px; font-style: italic; }
 
   /* CONTACT */
-  .contact-inner { display: grid; grid-template-columns: 1fr 1.2fr; gap: 80px; align-items: start; }
-  @media (max-width: 860px) { .contact-inner { grid-template-columns: 1fr; gap: 48px; } }
-  .contact-left h2 { font-family: 'Fraunces', serif; font-size: clamp(28px,3.2vw,40px); font-weight: 400; line-height: 1.2; margin-top: 14px; }
-  .contact-left p { color: var(--sage); font-size: 16px; margin-top: 18px; line-height: 1.65; }
-  .contact-photo { margin-top: 40px; border-radius: 4px; overflow: hidden; height: 260px; }
-  .contact-photo img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.78); }
+  .contact-inner { max-width: 720px; margin: 0 auto; }
+  .contact-intro { text-align: center; margin-bottom: 44px; }
+  .contact-intro h2 { font-family: 'Fraunces', serif; font-size: clamp(28px,3.5vw,44px); font-weight: 400; line-height: 1.15; margin-top: 18px; }
+  .contact-intro p { color: var(--sage); font-size: 17px; margin-top: 14px; line-height: 1.65; max-width: 520px; margin-left: auto; margin-right: auto; }
   .form-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 44px; }
   .field { margin-bottom: 20px; }
   .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
@@ -400,16 +444,24 @@ const css = `
   .footer-bottom { display: flex; justify-content: space-between; padding-top: 24px; border-top: 1px solid var(--line); font-size: 13px; color: var(--sage); flex-wrap: wrap; gap: 10px; }
 `;
 
-const logos = ["Amul","Swiggy","The/Nudge","LetsTransport","NASSCOM","TEDx","IRMA"];
+const logos = [
+  { name:"Amul",          src:"https://upload.wikimedia.org/wikipedia/commons/c/c4/Amul_Logo.png" },
+  { name:"Swiggy",        src:"https://upload.wikimedia.org/wikipedia/commons/a/a0/Swiggy_Logo_2024.webp" },
+  { name:"The/Nudge",     src:null },
+  { name:"LetsTransport", src:null },
+  { name:"NASSCOM",       src:"https://upload.wikimedia.org/wikipedia/commons/f/f9/NASSCOM_logo.svg" },
+  { name:"TEDx",          src:null },
+  { name:"IRMA",          src:null },
+];
 const services = [
   { num:"01", title:"Executive Coaching", desc:"One-on-one work with founders, CXOs, and senior leaders navigating pivotal decisions, leadership transitions, and the quieter parts of leading that rarely show up on a scorecard.", for:"Senior leaders seeking a trusted sounding board rather than another framework." },
   { num:"02", title:"Leadership Development", desc:"Coaching, workshops, cohort experiences, and leadership journeys designed to help individuals and teams lead with greater clarity, resilience, and impact.", for:"Organizations investing in stronger leaders at every level." },
   { num:"03", title:"Startup Advisory", desc:"Strategic counsel for founders and leadership teams on people, culture, leadership, and the human side of scaling.", for:"Founders building the leadership and people foundations their company will grow upon." },
 ];
 const testimonials = [
-  { text:"Composed. Thoughtful. An extremely good listener. Action-oriented. He helped me unlock my blind spots and become significantly more self-aware as a leader.", name:"Sudarshan Ravi Jha", role:"Co-founder, z21 Ventures & LetsTransport", avatar:"https://i.pravatar.cc/100?img=11" },
-  { text:"His frameworks on resilience and energy management offered practical, actionable insights. Our team continues to reference and apply them long after the session.", name:"Ritesh Agarwal", role:"VP, Educational Initiatives (Ei)", avatar:"https://i.pravatar.cc/100?img=33" },
-  { text:"He carries his skills lightly — humble, patient, always willing to listen. He challenges you to think differently without ever making you feel pushed.", name:"Neelacantan", role:"L&D Leader, Tekion", avatar:"https://i.pravatar.cc/100?img=52" },
+  { text:"Composed. Thoughtful. An extremely good listener. Action-oriented. He helped me unlock my blind spots and become significantly more self-aware as a leader.", name:"Sudarshan Ravi Jha", role:"Co-founder, z21 Ventures & LetsTransport", avatar:"/s.jpeg" },
+  { text:"His frameworks on resilience and energy management offered practical, actionable insights. Our team continues to reference and apply them long after the session.", name:"Ritesh Agarwal", role:"VP, Educational Initiatives (Ei)", avatar:"/4.jpg" },
+  { text:"He carries his skills lightly — humble, patient, always willing to listen. He challenges you to think differently without ever making you feel pushed.", name:"Neelacantan", role:"L&D Leader, Tekion", avatar:"/hero2.jpg" },
 ];
 const reflections = [
   { cat:"Leadership", pub:"People Matters", title:"Gen Z Isn't the Problem — You Are", desc:"What the loudest critiques of a generation reveal about the people making them." },
@@ -417,10 +469,10 @@ const reflections = [
   { cat:"Personal Growth", pub:"Blog", title:"Forget Self-Love — Self-Awareness Is the Real Superpower", desc:"Self-love is comforting. Self-awareness and accountability are what actually move you forward." },
 ];
 const creds = [
-  { title:"TEDx Speaker", sub:"MITSG, Mumbai" },
-  { title:"NASSCOM Mentor", sub:"Startup ecosystem" },
-  { title:"Certified Psychotherapist", sub:"100+ clinical hours" },
-  { title:"IRMA Alumnus", sub:"Anand, Gujarat" },
+  { title:"TEDx Speaker",            sub:"MITSG, Mumbai",       logo:null, icon:"tedx" },
+  { title:"NASSCOM Mentor",          sub:"Startup ecosystem",   logo:"https://upload.wikimedia.org/wikipedia/commons/f/f9/NASSCOM_logo.svg" },
+  { title:"Certified Psychotherapist", sub:"100+ clinical hours", logo:null, icon:"badge" },
+  { title:"IRMA Alumnus",            sub:"Anand, Gujarat",      logo:null, icon:"laurel" },
 ];
 
 function Nav() {
@@ -473,9 +525,13 @@ function Hero() {
   return (
     <section className="hero">
       <div className="hero-left">
-        <span className="eyebrow">Executive Coach · Leadership Advisor · Speaker</span>
+        <span className="section-eyebrow">UTSAV MISHRA</span>
         <p className="hero-tagline">A trusted sounding board for those who carry the weight of leadership.</p>
-        <h1 className="hero-h1 serif">Executive Coach.<br/>Leadership Advisor.<br/>Speaker.</h1>
+        <h1 className="hero-h1 serif">
+          <span className="hero-h1-line">Executive Coach.</span>
+          <span className="hero-h1-line">Leadership Advisor.</span>
+          <span className="hero-h1-line">Speaker.</span>
+        </h1>
         <p className="hero-body">Fifteen years across Amul, Swiggy, The/Nudge, and LetsTransport — now helping founders, CXOs, and leadership teams navigate the decisions that don't show up in a playbook.</p>
         <div className="hero-actions">
           <button className="btn-primary" onClick={() => document.getElementById("contact").scrollIntoView({behavior:"smooth"})}>
@@ -496,9 +552,13 @@ function Logos() {
   return (
     <section className="logos">
       <div className="wrap">
-        <p className="eyebrow">Organisations I've worked with</p>
+        <span className="section-eyebrow">Organisations I've worked with</span>
         <div className="logos-row">
-          {logos.map(l => <div className="logo-pill" key={l}>{l}</div>)}
+          {logos.map(l => (
+            l.src
+              ? <div className="logo-item" key={l.name}><img src={l.src} alt={l.name} /></div>
+              : <div className="logo-pill" key={l.name}>{l.name}</div>
+          ))}
         </div>
       </div>
     </section>
@@ -510,7 +570,7 @@ function Services() {
     <section className="section" id="services">
       <div className="wrap">
         <div className="section-head">
-          <span className="eyebrow">How we might work together</span>
+          <span className="section-eyebrow">How we might work together</span>
           <h2 className="serif">Three ways people usually reach out</h2>
           <p className="sub">Each is a different kind of engagement — pick the one that matches where you actually are.</p>
         </div>
@@ -564,7 +624,7 @@ function Testimonials() {
     <section className="section-sm" style={{background:"var(--paper)"}}>
       <div className="wrap">
         <div className="section-head">
-          <span className="testi-eyebrow">What clients say</span>
+          <span className="section-eyebrow">What clients say</span>
           <h2 className="serif">Heard from the room</h2>
         </div>
 
@@ -587,7 +647,7 @@ function Testimonials() {
                   <div className="testi-pro-card">
                     <div className="testi-pro-left">
                       <img className="testi-pro-avatar" src={t.avatar} alt={t.name} />
-                      <div className="testi-pro-overlay">
+                      <div>
                         <div className="testi-pro-name">{t.name}</div>
                         <div className="testi-pro-role">{t.role}</div>
                       </div>
@@ -630,7 +690,7 @@ function Why() {
       <div className="wrap">
         <div className="why-inner">
           <div className="why-left">
-            <span className="why-eyebrow">Why I do this work</span>
+            <span className="section-eyebrow">Why I do this work</span>
             <h2 className="serif">Because I love doing it.</h2>
             <div className="why-photo">
               <img src="/Why%20I%20do%20this%20work.JPG" alt="Utsav at work" />
@@ -648,6 +708,31 @@ function Why() {
   );
 }
 
+function CredIcon({ kind }) {
+  if (kind === "tedx") return (
+    <svg viewBox="0 0 120 56" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <text x="60" y="42" textAnchor="middle" fontFamily="Helvetica, Arial, sans-serif" fontSize="38" fontWeight="900" letterSpacing="-1" fill="#E62B1E">TED<tspan fontSize="22" baselineShift="super" dy="-6">x</tspan></text>
+    </svg>
+  );
+  if (kind === "badge") return (
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="32" cy="26" r="16" stroke="currentColor" strokeWidth="2.5" />
+      <path d="M22 38l-4 18 14-8 14 8-4-18" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" />
+      <path d="M25 26l5 5 9-10" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  if (kind === "laurel") return (
+    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M16 14c0 14 6 28 16 36" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M48 14c0 14-6 28-16 36" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M20 22c2 0 4-2 5-4M18 30c3 0 5-2 6-4M20 38c3 0 5-2 6-4M24 46c3 0 5-2 6-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M44 22c-2 0-4-2-5-4M46 30c-3 0-5-2-6-4M44 38c-3 0-5-2-6-4M40 46c-3 0-5-2-6-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <text x="32" y="36" textAnchor="middle" fontFamily="Fraunces, serif" fontSize="16" fontWeight="500" fill="currentColor">IRMA</text>
+    </svg>
+  );
+  return null;
+}
+
 function Credentials() {
   return (
     <section className="section-sand">
@@ -655,6 +740,9 @@ function Credentials() {
         <div className="creds-inner">
           {creds.map((c,i) => (
             <div className="cred" key={i}>
+              <div className="cred-logo">
+                {c.logo ? <img src={c.logo} alt={c.title} /> : <CredIcon kind={c.icon} />}
+              </div>
               <div className="cred-title serif">{c.title}</div>
               <div className="cred-sub">{c.sub}</div>
             </div>
@@ -671,7 +759,7 @@ function Reflections() {
       <div className="wrap">
         <div className="section-head" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",flexWrap:"wrap",gap:16}}>
           <div>
-            <span className="eyebrow">Reflections</span>
+            <span className="section-eyebrow">Reflections</span>
             <h2 className="serif">Writing, mostly to make sense of things.</h2>
             <p className="sub">Shared in case it's useful — selective pieces on leadership, career, and growth.</p>
           </div>
@@ -701,7 +789,7 @@ function Newsletter() {
     <section className="newsletter">
       <div className="wrap">
         <div className="nl-inner">
-          <span className="eyebrow">Reflections by email</span>
+          <span className="section-eyebrow">Reflections by email</span>
           <h2 className="serif">A note every few weeks.</h2>
           <p>On leadership, work, growth, and the questions I'm still trying to answer. No pitch, no automation — just the writing.</p>
           {done ? (
@@ -726,13 +814,10 @@ function Contact() {
     <section className="section" id="contact">
       <div className="wrap">
         <div className="contact-inner">
-          <div className="contact-left">
-            <span className="eyebrow">Get in touch</span>
+          <div className="contact-intro">
+            <span className="section-eyebrow">Get in touch</span>
             <h2 className="serif">Tell me a little about where you are.</h2>
             <p>No form designed to qualify you — just a short note on what's on your mind. I read every message personally.</p>
-            <div className="contact-photo">
-              <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=800&auto=format&fit=crop" alt="Utsav in conversation" />
-            </div>
           </div>
           <div className="form-card">
             {sent ? (
