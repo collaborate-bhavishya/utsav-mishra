@@ -132,6 +132,18 @@ export default function ResourceEditor({ table, title, fields, card }) {
                   required={field.required !== false}
                 />
               )}
+              {field.type === "select" && (
+                <select
+                  id={field.key}
+                  value={form[field.key]}
+                  onChange={(e) => setField(field.key, e.target.value)}
+                  required={field.required !== false}
+                  style={{ width: "100%", padding: "10px 12px", borderRadius: 5, border: "1px solid rgba(26,36,32,0.09)", fontSize: 15, fontFamily: "inherit", background: "#F7F3EE", color: "#1A2420" }}
+                >
+                  <option value="">— Select category —</option>
+                  {(field.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                </select>
+              )}
               {field.type === "image" && (
                 <>
                   <input

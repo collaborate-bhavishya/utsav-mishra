@@ -8,6 +8,28 @@ function formatDate(iso) {
   });
 }
 
+function exportCSV(rows) {
+  const headers = ["Name", "Email", "Phone", "Message", "Status", "Date"];
+  const lines = [
+    headers.join(","),
+    ...rows.map(r => [
+      `"${(r.name || "").replace(/"/g, '""')}"`,
+      `"${(r.email || "").replace(/"/g, '""')}"`,
+      `"${(r.phone || "").replace(/"/g, '""')}"`,
+      `"${(r.message || "").replace(/"/g, '""')}"`,
+      `"${r.status || ""}"`,
+      `"${formatDate(r.created_at)}"`,
+    ].join(","))
+  ];
+  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `leads-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function LeadsInbox() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,9 +67,16 @@ export default function LeadsInbox() {
 
   return (
     <div>
-      <h2 className="serif">
-        Leads{unreadCount > 0 ? ` (${unreadCount} new)` : ""}
-      </h2>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
+        <h2 className="serif">
+          Leads{unreadCount > 0 ? ` (${unreadCount} new)` : ""}
+        </h2>
+        {rows.length > 0 && (
+          <button className="admin-btn-primary" onClick={() => exportCSV(rows)} style={{ fontSize: 13 }}>
+            ↓ Export CSV
+          </button>
+        )}
+      </div>
       {error && <div className="admin-error">{error}</div>}
 
       {loading && <div className="admin-loading">Loading…</div>}

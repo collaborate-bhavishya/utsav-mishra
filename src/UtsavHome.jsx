@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useSupabaseList } from "./lib/useSupabaseList";
 import { supabase } from "./lib/supabase";
+import ReflectionsAllPage from "./ReflectionsAllPage";
+import ReflectionArticlePage from "./ReflectionArticlePage";
 
 const HERO_IMG = "/utsav-hero.png";
 
@@ -402,15 +404,49 @@ const css = `
   /* REFLECTIONS */
   .ref-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 52px; }
   @media (max-width: 860px) { .ref-grid { grid-template-columns: 1fr; } }
-  .ref-card { border-top: 2px solid var(--clay); padding-top: 22px; display: flex; flex-direction: column; gap: 10px; transition: opacity 0.2s; }
+  .ref-card { border-top: 2px solid var(--clay); padding-top: 22px; display: flex; flex-direction: column; gap: 10px; cursor: pointer; transition: opacity 0.2s; }
   .ref-card:hover { opacity: 0.7; }
   .ref-cat { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--clay); }
   .ref-card h4 { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 500; line-height: 1.3; }
-  .ref-card p { font-size: 14px; color: var(--sage); line-height: 1.6; flex-grow: 1; }
+  .ref-card p { font-size: 14px; color: var(--sage); line-height: 1.6; flex-grow: 1;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .ref-pub { font-size: 12px; color: var(--sage); opacity: 0.6; }
-  .ref-cta { text-align: center; margin-top: 48px; }
-  .btn-outline { border: 1.5px solid var(--ink); padding: 13px 28px; border-radius: 100px; font-size: 14px; font-weight: 600; background: none; color: var(--ink); transition: all 0.2s; }
+  .ref-cta { text-align: center; margin-top: 48px; display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn-outline { border: 1.5px solid var(--ink); padding: 13px 28px; border-radius: 100px; font-size: 14px; font-weight: 600; background: none; color: var(--ink); transition: all 0.2s; cursor: pointer; }
   .btn-outline:hover { background: var(--ink); color: var(--paper); }
+  .btn-outline-clay { border: 1.5px solid var(--clay); padding: 13px 28px; border-radius: 100px; font-size: 14px; font-weight: 600; background: none; color: var(--clay); transition: all 0.2s; cursor: pointer; }
+  .btn-outline-clay:hover { background: var(--clay); color: #fff; }
+
+  /* FLOATING SOCIAL */
+  .social-float {
+    position: fixed; right: 0; top: 50%; transform: translateY(-50%);
+    z-index: 200; display: flex; flex-direction: column; gap: 8px;
+  }
+  .social-float-item {
+    display: flex; align-items: center; justify-content: flex-end;
+    overflow: hidden;
+    border-radius: 24px 0 0 24px;
+    background: var(--clay);
+    box-shadow: -2px 2px 12px rgba(0,0,0,0.15);
+    transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+    width: 44px; height: 44px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #fff;
+  }
+  .social-float-item:hover { width: 140px; }
+  .social-float-label {
+    font-size: 13px; font-weight: 600; white-space: nowrap;
+    opacity: 0; transition: opacity 0.2s 0.1s;
+    padding-left: 12px;
+    pointer-events: none;
+  }
+  .social-float-item:hover .social-float-label { opacity: 1; }
+  .social-float-icon {
+    min-width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
 
   /* NEWSLETTER */
   .newsletter { background: #232E29; padding: 80px 0; }
@@ -488,15 +524,18 @@ const DEFAULT_TESTIMONIALS = [
   { text:"He carries his skills lightly — humble, patient, always willing to listen. He challenges you to think differently without ever making you feel pushed.", name:"Neelacantan", role:"L&D Leader, Tekion", avatar:"/hero2.jpg" },
 ];
 const DEFAULT_REFLECTIONS = [
-  { cat:"Leadership", pub:"People Matters", title:"Gen Z Isn't the Problem — You Are", desc:"What the loudest critiques of a generation reveal about the people making them." },
-  { cat:"Career", pub:"ETHRWorld", title:"Three Ways People Find Work They Truly Love", desc:"Most people are only taught one path. There are two others — and they're more reliable." },
-  { cat:"Personal Growth", pub:"Blog", title:"Forget Self-Love — Self-Awareness Is the Real Superpower", desc:"Self-love is comforting. Self-awareness and accountability are what actually move you forward." },
+  { cat:"Leadership & Workplace Culture", pub:"People Matters", title:"Gen Z Isn't the Problem — You Are", desc:"What the loudest critiques of a generation reveal about the people making them.", body:"What the loudest critiques of a generation reveal about the people making them. Leaders often externalize problems that are closer to home than they'd like to admit. The generational lens is a convenient distraction from the harder work of self-examination.", link:"" },
+  { cat:"Career Paths & Professional Development", pub:"ETHRWorld", title:"Three Ways People Find Work They Truly Love", desc:"Most people are only taught one path. There are two others — and they're more reliable.", body:"Most people are only taught one path to fulfilling work: follow your passion. But passion is often discovered, not followed. There are two other paths — competence and contribution — that are more reliable and more honest about how careers actually unfold.", link:"" },
+  { cat:"Personal Growth & Mindset", pub:"Blog", title:"Forget Self-Love — Self-Awareness Is the Real Superpower", desc:"Self-love is comforting. Self-awareness and accountability are what actually move you forward.", body:"Self-love is comforting. Self-awareness and accountability are what actually move you forward. The culture of self-love, while well-intentioned, has sometimes become an excuse to avoid the honest reckoning with our patterns, blind spots, and defaults.", link:"" },
+  { cat:"Leadership & Workplace Culture", pub:"Blog", title:"The Leader Who Listens", desc:"Most leaders think they listen. Very few actually do — and the gap shows up everywhere.", body:"Most leaders think they listen. Very few actually do. Listening isn't silence; it's active presence. The gap between thinking you listen and actually listening shows up in team trust, in the quality of decisions, and in the culture you leave behind.", link:"" },
+  { cat:"Career Paths & Professional Development", pub:"LinkedIn", title:"Why Your First Job Title Doesn't Define Your Career", desc:"The early years are for learning, not positioning. The obsession with titles gets in the way.", body:"The early years of a career are for learning, not positioning. The obsession with titles, levels, and perceived prestige gets in the way of the more important work: developing curiosity, building relationships, and figuring out what you're actually good at.", link:"" },
+  { cat:"Personal Growth & Mindset", pub:"Blog", title:"On Stillness as a Leadership Practice", desc:"The most effective leaders I've worked with share one unusual habit: they protect their thinking time.", body:"The most effective leaders I've worked with share one unusual habit: they protect their thinking time fiercely. In a culture that rewards busyness, stillness is a radical act. It's also, I've found, one of the highest-leverage things a leader can do.", link:"" },
 ];
 const creds = [
-  { title:"TEDx Speaker",            sub:"MITSG, Mumbai",       logo:"/Partner%20logos/TEDx.png" },
-  { title:"NASSCOM Mentor",          sub:"Startup ecosystem",   logo:"https://upload.wikimedia.org/wikipedia/commons/f/f9/NASSCOM_logo.svg" },
-  { title:"Certified Psychotherapist", sub:"100+ clinical hours", logo:null, icon:"badge" },
-  { title:"IRMA Alumnus",            sub:"Anand, Gujarat",      logo:"/Partner%20logos/irma.jpg" },
+  { title:"TEDx Speaker",              sub:"",  logo:"/Partner%20logos/TEDx.png" },
+  { title:"NASSCOM Startup Mentor",    sub:"",  logo:"/Partner%20logos/nasscom.jpg" },
+  { title:"Certified Psychotherapist", sub:"",  logo:null, icon:"badge" },
+  { title:"IRMA Alumnus",              sub:"",  logo:"/Partner%20logos/irma.jpg" },
 ];
 
 function Nav() {
@@ -514,7 +553,7 @@ function Nav() {
   return (
     <nav className={`nav${scrolled ? " scrolled" : ""}${menuOpen ? " menu-active" : ""}`}>
       <div className="nav-logo">
-        <img src="/logo_wBG.png" alt="Utsav Mishra" />
+        <img src="/brown transparent .png" alt="Utsav Mishra" />
       </div>
       <div className="nav-links">
         <a href="#services">Work</a>
@@ -791,12 +830,13 @@ function Credentials() {
   );
 }
 
-function Reflections() {
+function Reflections({ onOpenArticle, onReadAll }) {
   const reflections = useSupabaseList(
     "reflections",
-    (row) => ({ cat: row.category, pub: row.publication, title: row.title, desc: row.description, link: row.link }),
+    (row) => ({ cat: row.category, pub: row.publication, title: row.title, desc: row.description, body: row.body || row.description, link: row.link }),
     DEFAULT_REFLECTIONS
   );
+  const shown = reflections.slice(0, 6);
   return (
     <section className="section" id="reflections">
       <div className="wrap">
@@ -808,17 +848,20 @@ function Reflections() {
           </div>
         </div>
         <div className="ref-grid">
-          {reflections.map((r,i) => (
-            <a href={r.link || "#"} className="ref-card" key={i}>
+          {shown.map((r,i) => (
+            <div className="ref-card" key={i} onClick={() => onOpenArticle(r)} role="button" tabIndex={0} onKeyDown={e => e.key==="Enter" && onOpenArticle(r)}>
               <span className="ref-cat">{r.cat}</span>
               <h4 className="serif">{r.title}</h4>
               <p>{r.desc}</p>
               <span className="ref-pub">{r.pub}</span>
-            </a>
+            </div>
           ))}
         </div>
         <div className="ref-cta">
-          <button className="btn-outline">Read all reflections</button>
+          <button className="btn-outline" onClick={onReadAll}>Read all reflections</button>
+          <button className="btn-outline-clay" onClick={() => document.getElementById("newsletter").scrollIntoView({behavior:"smooth"})}>
+            Receive Reflections by email
+          </button>
         </div>
       </div>
     </section>
@@ -828,8 +871,21 @@ function Reflections() {
 function Newsletter() {
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState("");
+
+  const onSubmit = async e => {
+    e.preventDefault();
+    if (!email) return;
+    setSaving(true); setErr("");
+    const { error } = await supabase.from("subscribers").insert({ email });
+    setSaving(false);
+    if (error && !error.message.includes("duplicate")) { setErr("Something went wrong — please try again."); return; }
+    setDone(true);
+  };
+
   return (
-    <section className="newsletter">
+    <section className="newsletter" id="newsletter">
       <div className="wrap">
         <div className="nl-inner">
           <span className="section-eyebrow">Reflections by email</span>
@@ -838,10 +894,13 @@ function Newsletter() {
           {done ? (
             <p className="nl-done">You're in — I'll be in touch soon.</p>
           ) : (
-            <form className="nl-form" onSubmit={e => { e.preventDefault(); if(email) setDone(true); }}>
-              <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} required />
-              <button type="submit" className="btn-primary">Receive Reflections</button>
-            </form>
+            <>
+              {err && <p className="nl-done" style={{color:"#B3261E"}}>{err}</p>}
+              <form className="nl-form" onSubmit={onSubmit}>
+                <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} required />
+                <button type="submit" className="btn-primary" disabled={saving}>{saving ? "Saving…" : "Receive Reflections"}</button>
+              </form>
+            </>
           )}
         </div>
       </div>
@@ -937,9 +996,8 @@ function Footer() {
             </div>
             <div className="footer-col">
               <h5>Presence</h5>
-              <a href="https://linkedin.com/in/utsavmish" target="_blank" rel="noreferrer">LinkedIn</a>
-              <a href="#">Instagram</a>
-              <a href="#">YouTube</a>
+              <a href="https://www.linkedin.com/in/utsmis/" target="_blank" rel="noreferrer">LinkedIn</a>
+              <a href="https://www.instagram.com/getrealwithutsav" target="_blank" rel="noreferrer">Instagram</a>
             </div>
           </div>
         </div>
@@ -952,7 +1010,36 @@ function Footer() {
   );
 }
 
+function SocialFloat() {
+  return (
+    <div className="social-float">
+      <a className="social-float-item" href="https://www.linkedin.com/in/utsmis/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+        <span className="social-float-label">LinkedIn</span>
+        <span className="social-float-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </span>
+      </a>
+      <a className="social-float-item" href="https://www.instagram.com/getrealwithutsav" target="_blank" rel="noreferrer" aria-label="Instagram">
+        <span className="social-float-label">Instagram</span>
+        <span className="social-float-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </span>
+      </a>
+    </div>
+  );
+}
+
 export default function UtsavHome() {
+  const [page, setPage] = useState("home"); // "home" | "all-reflections" | "article"
+  const [activeArticle, setActiveArticle] = useState(null);
+
+  if (page === "article" && activeArticle) {
+    return <ReflectionArticlePage article={activeArticle} onBack={() => setPage("home")} />;
+  }
+  if (page === "all-reflections") {
+    return <ReflectionsAllPage onBack={() => setPage("home")} onOpenArticle={a => { setActiveArticle(a); setPage("article"); }} />;
+  }
+
   return (
     <div className="um">
       <style>{css}</style>
@@ -963,7 +1050,6 @@ export default function UtsavHome() {
       <PhotoStrip
         src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1600&auto=format&fit=crop"
         alt="Leadership workshop facilitation"
-        caption="Leadership offsite, Bengaluru"
       />
       <Testimonials />
       <Why />
@@ -971,12 +1057,15 @@ export default function UtsavHome() {
       <PhotoStrip
         src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1600&auto=format&fit=crop"
         alt="Speaking at TEDx"
-        caption="TEDx MITSG, Mumbai"
       />
-      <Reflections />
+      <Reflections
+        onOpenArticle={a => { setActiveArticle(a); setPage("article"); }}
+        onReadAll={() => setPage("all-reflections")}
+      />
       <Newsletter />
       <Contact />
       <Footer />
+      <SocialFloat />
     </div>
   );
 }

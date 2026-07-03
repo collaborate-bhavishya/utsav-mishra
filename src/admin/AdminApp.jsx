@@ -12,6 +12,16 @@ const TABS = [
     component: LeadsInbox,
   },
   {
+    key: "subscribers",
+    label: "Subscribers",
+    table: "subscribers",
+    title: "Email Subscribers",
+    card: { titleKey: "email", subKey: "created_at" },
+    fields: [
+      { key: "email", label: "Email", type: "text" },
+    ],
+  },
+  {
     key: "testimonials",
     label: "Testimonials",
     table: "testimonials",
@@ -31,11 +41,16 @@ const TABS = [
     title: "Reflections",
     card: { titleKey: "title", subKey: "publication", textKey: "description" },
     fields: [
-      { key: "category", label: "Category", type: "text" },
+      { key: "category", label: "Category", type: "select", options: [
+        "Leadership & Workplace Culture",
+        "Career Paths & Professional Development",
+        "Personal Growth & Mindset",
+      ]},
       { key: "publication", label: "Publication", type: "text" },
       { key: "title", label: "Title", type: "text" },
-      { key: "description", label: "Description", type: "textarea" },
-      { key: "link", label: "Link (optional)", type: "text", required: false },
+      { key: "description", label: "Short description (shown on cards)", type: "textarea" },
+      { key: "body", label: "Full article body", type: "textarea", required: false },
+      { key: "link", label: "External link (optional)", type: "text", required: false },
     ],
   },
   {
