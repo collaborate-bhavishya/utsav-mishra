@@ -2,9 +2,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import Login from "./Login";
 import ResourceEditor from "./ResourceEditor";
+import LeadsInbox from "./LeadsInbox";
 import "./admin.css";
 
 const TABS = [
+  {
+    key: "leads",
+    label: "Leads",
+    component: LeadsInbox,
+  },
   {
     key: "testimonials",
     label: "Testimonials",
@@ -78,7 +84,9 @@ export default function AdminApp() {
         ))}
       </div>
       <div className="admin-body">
-        <ResourceEditor table={tab.table} title={tab.title} fields={tab.fields} card={tab.card} />
+        {tab.component
+          ? <tab.component />
+          : <ResourceEditor table={tab.table} title={tab.title} fields={tab.fields} card={tab.card} />}
       </div>
     </div>
   );

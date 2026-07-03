@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSupabaseList } from "./lib/useSupabaseList";
+import { supabase } from "./lib/supabase";
 
 const HERO_IMG = "/utsav-hero.png";
 
@@ -492,10 +493,10 @@ const DEFAULT_REFLECTIONS = [
   { cat:"Personal Growth", pub:"Blog", title:"Forget Self-Love — Self-Awareness Is the Real Superpower", desc:"Self-love is comforting. Self-awareness and accountability are what actually move you forward." },
 ];
 const creds = [
-  { title:"TEDx Speaker",            sub:"MITSG, Mumbai",       logo:null, icon:"tedx" },
+  { title:"TEDx Speaker",            sub:"MITSG, Mumbai",       logo:"/Partner%20logos/TEDx.png" },
   { title:"NASSCOM Mentor",          sub:"Startup ecosystem",   logo:"https://upload.wikimedia.org/wikipedia/commons/f/f9/NASSCOM_logo.svg" },
   { title:"Certified Psychotherapist", sub:"100+ clinical hours", logo:null, icon:"badge" },
-  { title:"IRMA Alumnus",            sub:"Anand, Gujarat",      logo:null, icon:"laurel" },
+  { title:"IRMA Alumnus",            sub:"Anand, Gujarat",      logo:"/Partner%20logos/irma.jpg" },
 ];
 
 function Nav() {
@@ -851,7 +852,23 @@ function Newsletter() {
 function Contact() {
   const [form, setForm] = useState({ name:"", email:"", phone:"", focus:"" });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
   const set = e => setForm({...form, [e.target.name]: e.target.value});
+
+  const onSubmit = async e => {
+    e.preventDefault();
+    if (!(form.name && form.email)) return;
+    setSending(true);
+    setError("");
+    const { error } = await supabase.from("leads").insert({
+      name: form.name, email: form.email, phone: form.phone, message: form.focus,
+    });
+    setSending(false);
+    if (error) { setError("Something went wrong — please try again or email directly."); return; }
+    setSent(true);
+  };
+
   return (
     <section className="section" id="contact">
       <div className="wrap">
@@ -868,7 +885,8 @@ function Contact() {
                 <p>Your message has been received. Utsav reads these personally and will be in touch if there's a fit.</p>
               </div>
             ) : (
-              <form onSubmit={e => { e.preventDefault(); if(form.name && form.email) setSent(true); }}>
+              <form onSubmit={onSubmit}>
+                {error && <p className="form-note" style={{color:"#B3261E"}}>{error}</p>}
                 <div className="field-row">
                   <div className="field">
                     <label htmlFor="f-name">Full name</label>
@@ -887,7 +905,9 @@ function Contact() {
                   <label htmlFor="f-focus">What's on your mind?</label>
                   <textarea id="f-focus" name="focus" rows={4} placeholder="A line or two on what you're navigating right now." value={form.focus} onChange={set} />
                 </div>
-                <button type="submit" className="btn-primary" style={{width:"100%",justifyContent:"center"}}>Send</button>
+                <button type="submit" className="btn-primary" style={{width:"100%",justifyContent:"center"}} disabled={sending}>
+                  {sending ? "Sending…" : "Send"}
+                </button>
                 <p className="form-note">No automated follow-ups. Just a personal reply.</p>
               </form>
             )}
