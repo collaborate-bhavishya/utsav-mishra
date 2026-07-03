@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useSupabaseList } from "./lib/useSupabaseList";
 
 const HERO_IMG = "/utsav-hero.png";
 
@@ -52,12 +53,13 @@ const css = `
     padding: 16px 36px;
     display: flex; align-items: center; justify-content: space-between;
     gap: 16px;
+    background: var(--sand);
     transition: background 0.35s, box-shadow 0.35s;
   }
   @media (max-width: 1024px) { .nav { padding: 14px 24px; } }
   @media (max-width: 760px)  { .nav { padding: 14px 20px; } }
   .nav.scrolled {
-    background: rgba(247,243,238,0.96);
+    background: rgba(237,229,216,0.96);
     backdrop-filter: blur(10px);
     box-shadow: 0 1px 0 var(--line);
   }
@@ -137,13 +139,13 @@ const css = `
 
   /* HERO — warm pastel split */
   .hero {
-    height: calc(100vh - 100px);
+    height: calc(100vh - 92px);
     min-height: 560px;
     max-height: 760px;
-    margin-top: 100px;
+    margin-top: 92px;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    background: #FFFFFF;
+    background: var(--sand);
     overflow: hidden;
     position: relative;
   }
@@ -166,7 +168,7 @@ const css = `
     align-items: flex-start; text-align: left;
     padding: 48px 56px 48px 140px;
     height: 100%;
-    background: #FFFFFF;
+    background: transparent;
   }
   .hero-left > * { max-width: 480px; }
   @media (max-width: 1100px) { .hero-left { padding: 40px 36px 40px 40px; } }
@@ -216,7 +218,7 @@ const css = `
   /* Hero right — portrait */
   .hero-right {
     position: relative;
-    background: #FFFFFF;
+    background: transparent;
     overflow: hidden;
     height: 100%;
     padding-top: 32px;
@@ -232,20 +234,27 @@ const css = `
   }
 
   /* LOGOS */
-  .logos { padding: 44px 0; background: var(--sand); border-bottom: 1px solid var(--line); }
-  .logos .section-eyebrow { display: block; text-align: center; margin: 0 auto 28px; }
-  .logos-row { display: flex; align-items: center; justify-content: center; gap: 32px; flex-wrap: wrap; }
+  .logos { padding: 72px 0; background: #FFFFFF; border-bottom: 1px solid var(--line); }
+  .logos .section-eyebrow { display: block; text-align: center; margin: 0 auto 40px; }
+  .logos-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    row-gap: 28px;
+    column-gap: 32px;
+    align-items: center;
+    max-width: 960px;
+    margin: 0 auto;
+  }
   .logo-item {
-    height: 44px;
+    min-height: 88px;
     display: flex; align-items: center; justify-content: center;
   }
   .logo-item img {
-    max-height: 38px; width: auto; max-width: 130px;
+    max-height: 80px; width: auto; max-width: 200px;
     object-fit: contain;
-    filter: grayscale(1) brightness(0.6); opacity: 0.75;
-    transition: filter 0.2s, opacity 0.2s;
   }
-  .logo-item:hover img { filter: grayscale(0) brightness(1); opacity: 1; }
+  .logo-item img[alt="Indian Air Force"] { max-height: 120px; max-width: 140px; }
+  @media (max-width: 720px) { .logos-row { grid-template-columns: repeat(2, 1fr); row-gap: 24px; column-gap: 20px; } }
   .logo-pill {
     background: rgba(26,36,32,0.06); border-radius: 3px; padding: 11px 22px;
     font-family: 'Fraunces', serif; font-size: 14px; color: var(--sage);
@@ -444,26 +453,40 @@ const css = `
   .footer-bottom { display: flex; justify-content: space-between; padding-top: 24px; border-top: 1px solid var(--line); font-size: 13px; color: var(--sage); flex-wrap: wrap; gap: 10px; }
 `;
 
-const logos = [
-  { name:"Amul",          src:"https://upload.wikimedia.org/wikipedia/commons/c/c4/Amul_Logo.png" },
-  { name:"Swiggy",        src:"https://upload.wikimedia.org/wikipedia/commons/a/a0/Swiggy_Logo_2024.webp" },
-  { name:"The/Nudge",     src:null },
-  { name:"LetsTransport", src:null },
-  { name:"NASSCOM",       src:"https://upload.wikimedia.org/wikipedia/commons/f/f9/NASSCOM_logo.svg" },
-  { name:"TEDx",          src:null },
-  { name:"IRMA",          src:null },
+const PARTNERS = "/Partner%20logos";
+const DEFAULT_LOGOS = [
+  // Row 1 — Highest credibility / immediate trust
+  { name:"Indian Air Force",           src:`${PARTNERS}/Indian%20Air%20Force.png` },
+  { name:"Western Digital",            src:`${PARTNERS}/Western%20Digital.png` },
+  { name:"NetApp",                     src:`${PARTNERS}/netapp.jpg` },
+  { name:"ITC Infotech",               src:`${PARTNERS}/ITC%20Infotech.png` },
+  // Row 2 — Well-known Indian brands
+  { name:"Swiggy",                     src:`${PARTNERS}/Swiggy.png` },
+  { name:"Amul",                       src:`${PARTNERS}/Amul.png` },
+  { name:"Indira IVF",                 src:`${PARTNERS}/Indira%20IVF.png` },
+  { name:"Bajaj Consumer Care",        src:`${PARTNERS}/Bajaj%20consumer%20care.jpg` },
+  // Row 3 — High-growth tech & startup ecosystem
+  { name:"The Modern Data Company",    src:`${PARTNERS}/themoderndatacompany.jpg` },
+  { name:"LetsTransport",              src:`${PARTNERS}/letstransport.png` },
+  { name:"60 Decibels",                src:`${PARTNERS}/60%20decibels.png` },
+  { name:"z21 Ventures",               src:`${PARTNERS}/z21%20ventures.png` },
+  // Row 4 — Development & social impact
+  { name:"Svatantra Microfinance",     src:`${PARTNERS}/Svatantra%20Microfinance.png` },
+  { name:"United Way Bengaluru",       src:`${PARTNERS}/United%20Way%20Bengaluru.png` },
+  { name:"Educational Initiatives (Ei)",src:`${PARTNERS}/Ei.png` },
+  { name:"India Partner Network",      src:`${PARTNERS}/India%20Partner%20Network.png` },
 ];
 const services = [
   { num:"01", title:"Executive Coaching", desc:"One-on-one work with founders, CXOs, and senior leaders navigating pivotal decisions, leadership transitions, and the quieter parts of leading that rarely show up on a scorecard.", for:"Senior leaders seeking a trusted sounding board rather than another framework." },
   { num:"02", title:"Leadership Development", desc:"Coaching, workshops, cohort experiences, and leadership journeys designed to help individuals and teams lead with greater clarity, resilience, and impact.", for:"Organizations investing in stronger leaders at every level." },
   { num:"03", title:"Startup Advisory", desc:"Strategic counsel for founders and leadership teams on people, culture, leadership, and the human side of scaling.", for:"Founders building the leadership and people foundations their company will grow upon." },
 ];
-const testimonials = [
+const DEFAULT_TESTIMONIALS = [
   { text:"Composed. Thoughtful. An extremely good listener. Action-oriented. He helped me unlock my blind spots and become significantly more self-aware as a leader.", name:"Sudarshan Ravi Jha", role:"Co-founder, z21 Ventures & LetsTransport", avatar:"/s.jpeg" },
   { text:"His frameworks on resilience and energy management offered practical, actionable insights. Our team continues to reference and apply them long after the session.", name:"Ritesh Agarwal", role:"VP, Educational Initiatives (Ei)", avatar:"/4.jpg" },
   { text:"He carries his skills lightly — humble, patient, always willing to listen. He challenges you to think differently without ever making you feel pushed.", name:"Neelacantan", role:"L&D Leader, Tekion", avatar:"/hero2.jpg" },
 ];
-const reflections = [
+const DEFAULT_REFLECTIONS = [
   { cat:"Leadership", pub:"People Matters", title:"Gen Z Isn't the Problem — You Are", desc:"What the loudest critiques of a generation reveal about the people making them." },
   { cat:"Career", pub:"ETHRWorld", title:"Three Ways People Find Work They Truly Love", desc:"Most people are only taught one path. There are two others — and they're more reliable." },
   { cat:"Personal Growth", pub:"Blog", title:"Forget Self-Love — Self-Awareness Is the Real Superpower", desc:"Self-love is comforting. Self-awareness and accountability are what actually move you forward." },
@@ -549,10 +572,15 @@ function Hero() {
 }
 
 function Logos() {
+  const logos = useSupabaseList(
+    "partner_logos",
+    (row) => ({ name: row.name, src: row.image_url }),
+    DEFAULT_LOGOS
+  );
   return (
     <section className="logos">
       <div className="wrap">
-        <span className="section-eyebrow">Organisations I've worked with</span>
+        <span className="section-eyebrow">Leaders &amp; Organizations Served</span>
         <div className="logos-row">
           {logos.map(l => (
             l.src
@@ -599,6 +627,11 @@ function PhotoStrip({ src, alt, caption }) {
 }
 
 function Testimonials() {
+  const testimonials = useSupabaseList(
+    "testimonials",
+    (row) => ({ text: row.text, name: row.name, role: row.role, avatar: row.avatar_url }),
+    DEFAULT_TESTIMONIALS
+  );
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const touchStart = useRef(null);
@@ -607,10 +640,14 @@ function Testimonials() {
   const next = () => setActive(a => (a + 1) % testimonials.length);
 
   useEffect(() => {
-    if (paused) return;
+    if (active >= testimonials.length) setActive(0);
+  }, [testimonials, active]);
+
+  useEffect(() => {
+    if (paused || testimonials.length < 2) return;
     const id = setInterval(() => setActive(a => (a + 1) % testimonials.length), 5000);
     return () => clearInterval(id);
-  }, [paused]);
+  }, [paused, testimonials.length]);
 
   const onTouchStart = e => { touchStart.current = e.touches[0].clientX; };
   const onTouchEnd = e => {
@@ -754,6 +791,11 @@ function Credentials() {
 }
 
 function Reflections() {
+  const reflections = useSupabaseList(
+    "reflections",
+    (row) => ({ cat: row.category, pub: row.publication, title: row.title, desc: row.description, link: row.link }),
+    DEFAULT_REFLECTIONS
+  );
   return (
     <section className="section" id="reflections">
       <div className="wrap">
@@ -766,7 +808,7 @@ function Reflections() {
         </div>
         <div className="ref-grid">
           {reflections.map((r,i) => (
-            <a href="#" className="ref-card" key={i}>
+            <a href={r.link || "#"} className="ref-card" key={i}>
               <span className="ref-cat">{r.cat}</span>
               <h4 className="serif">{r.title}</h4>
               <p>{r.desc}</p>
