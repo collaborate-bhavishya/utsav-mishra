@@ -7,7 +7,7 @@ function emptyForm(fields) {
   return f;
 }
 
-export default function ResourceEditor({ table, title, fields, card }) {
+export default function ResourceEditor({ table, title, fields, card, favoriteKey, favoriteLimit }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -89,6 +89,17 @@ export default function ResourceEditor({ table, title, fields, card }) {
     else load();
   };
 
+  const toggleFavorite = async (row) => {
+    setError("");
+    const next = !row[favoriteKey];
+    const { error } = await supabase
+      .from(table)
+      .update({ [favoriteKey]: next, favourited_at: next ? new Date().toISOString() : null })
+      .eq("id", row.id);
+    if (error) setError(error.message);
+    else load();
+  };
+
   const move = async (index, direction) => {
     const otherIndex = index + direction;
     if (otherIndex < 0 || otherIndex >= rows.length) return;
@@ -101,9 +112,18 @@ export default function ResourceEditor({ table, title, fields, card }) {
     load();
   };
 
+  const favoriteCount = favoriteKey ? rows.filter((r) => r[favoriteKey]).length : 0;
+
   return (
     <div>
-      <h2 className="serif">{title}</h2>
+      <h2 className="serif">
+        {title}
+        {favoriteKey && (
+          <span style={{ fontSize: 14, fontWeight: 500, color: "#6B7B6C", marginLeft: 10 }}>
+            ({favoriteCount} favourited{favoriteLimit ? ` — homepage shows the ${favoriteLimit} most recent` : ""})
+          </span>
+        )}
+      </h2>
       {error && <div className="admin-error">{error}</div>}
 
       {!showForm && (
@@ -187,6 +207,15 @@ export default function ResourceEditor({ table, title, fields, card }) {
             {card.textKey && <div className="admin-card-text">{row[card.textKey]}</div>}
           </div>
           <div className="admin-card-actions">
+            {favoriteKey && (
+              <button
+                onClick={() => toggleFavorite(row)}
+                title={row[favoriteKey] ? "Remove from homepage favourites" : "Favourite — show on homepage"}
+                style={row[favoriteKey] ? { color: "#B85C30", borderColor: "#B85C30" } : undefined}
+              >
+                {row[favoriteKey] ? "★ Favourited" : "☆ Favourite"}
+              </button>
+            )}
             <button onClick={() => move(i, -1)} disabled={i === 0}>↑</button>
             <button onClick={() => move(i, 1)} disabled={i === rows.length - 1}>↓</button>
             <button onClick={() => startEdit(row)}>Edit</button>

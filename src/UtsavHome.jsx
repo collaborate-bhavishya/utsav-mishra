@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSupabaseList } from "./lib/useSupabaseList";
 import { supabase } from "./lib/supabase";
+import { trackPageView, trackCTA, initScrollTracking } from "./lib/analytics";
 import ReflectionsAllPage from "./ReflectionsAllPage";
 import ReflectionArticlePage from "./ReflectionArticlePage";
 
@@ -180,7 +181,7 @@ const css = `
   .hero-left .eyebrow { margin-bottom: 22px; }
 
   .hero-tagline {
-    font-size: 15px; color: var(--sage); margin-bottom: 18px;
+    font-size: 15px; color: var(--sage); margin-top: 18px; margin-bottom: 18px;
     font-style: italic; font-family: 'Fraunces', serif; font-weight: 300;
   }
 
@@ -363,9 +364,8 @@ const css = `
   }
 
   /* WHY */
-  .why-inner { display: grid; grid-template-columns: 1fr 1.35fr; gap: 80px; align-items: center; }
-  @media (max-width: 860px) { .why-inner { grid-template-columns: 1fr; gap: 40px; } }
-  .why-left h2 { font-family: 'Fraunces', serif; font-size: clamp(28px,3.5vw,44px); font-weight: 400; line-height: 1.15; margin-top: 18px; color: var(--paper); }
+  .why-inner { max-width: 700px; margin: 0 auto; }
+  .why-header h2 { font-family: 'Fraunces', serif; font-size: clamp(28px,3.5vw,44px); font-weight: 400; line-height: 1.15; margin-top: 18px; color: var(--paper); }
   .why-eyebrow {
     display: inline-block;
     font-size: 14px; font-weight: 700;
@@ -374,8 +374,9 @@ const css = `
     padding-bottom: 6px;
     border-bottom: 2px solid var(--clay);
   }
-  .why-photo { margin-top: 56px; border-radius: 4px; overflow: hidden; height: 360px; }
+  .why-photo { margin: 40px 0 48px; border-radius: 4px; overflow: hidden; height: 420px; }
   .why-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 12%; filter: saturate(0.72) brightness(0.92); }
+  @media (max-width: 600px) { .why-photo { height: 300px; } }
   .why-body p { font-size: 17px; line-height: 1.78; color: rgba(247,243,238,0.68); margin-bottom: 22px; }
   .why-body p:last-child { margin-bottom: 0; }
 
@@ -420,30 +421,28 @@ const css = `
   /* FLOATING SOCIAL */
   .social-float {
     position: fixed; right: 0; top: 50%; transform: translateY(-50%);
-    z-index: 200; display: flex; flex-direction: column; gap: 8px;
+    z-index: 200; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
   }
   .social-float-item {
     display: flex; align-items: center; justify-content: flex-end;
-    overflow: hidden;
     border-radius: 24px 0 0 24px;
     background: var(--clay);
     box-shadow: -2px 2px 12px rgba(0,0,0,0.15);
-    transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
-    width: 44px; height: 44px;
+    height: 44px;
     cursor: pointer;
     text-decoration: none;
     color: #fff;
   }
-  .social-float-item:hover { width: 140px; }
   .social-float-label {
+    display: inline-block;
     font-size: 13px; font-weight: 600; white-space: nowrap;
-    opacity: 0; transition: opacity 0.2s 0.1s;
-    padding-left: 12px;
+    max-width: 0; opacity: 0; overflow: hidden;
+    transition: max-width 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.2s ease 0.05s, padding-left 0.3s cubic-bezier(0.4,0,0.2,1);
     pointer-events: none;
   }
-  .social-float-item:hover .social-float-label { opacity: 1; }
+  .social-float-item:hover .social-float-label { max-width: 110px; opacity: 1; padding-left: 12px; }
   .social-float-icon {
-    min-width: 44px; height: 44px;
+    width: 44px; height: 44px;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
@@ -533,9 +532,9 @@ const DEFAULT_REFLECTIONS = [
 ];
 const creds = [
   { title:"TEDx Speaker",              sub:"",  logo:"/Partner%20logos/TEDx.png" },
-  { title:"NASSCOM Startup Mentor",    sub:"",  logo:"/Partner%20logos/nasscom.jpg" },
+  { title:"NASSCOM Startup Mentor",    sub:"",  logo:"/Partner%20logos/nasscom.png" },
   { title:"Certified Psychotherapist", sub:"",  logo:null, icon:"badge" },
-  { title:"IRMA Alumnus",              sub:"",  logo:"/Partner%20logos/irma.jpg" },
+  { title:"IRMA Alumnus",              sub:"",  logo:"/Partner%20logos/irma.png" },
 ];
 
 function Nav() {
@@ -561,7 +560,7 @@ function Nav() {
         <a href="#reflections">Reflections</a>
         <a href="#contact">Contact</a>
       </div>
-      <button className="nav-cta" onClick={() => { closeMenu(); document.getElementById("contact").scrollIntoView({behavior:"smooth"}); }}>Start a conversation</button>
+      <button className="nav-cta" onClick={() => { trackCTA("nav_start_conversation"); closeMenu(); document.getElementById("contact").scrollIntoView({behavior:"smooth"}); }}>Start a conversation</button>
       
       <button className="nav-toggle" onClick={toggleMenu} aria-label="Toggle menu">
         {menuOpen ? (
@@ -577,7 +576,7 @@ function Nav() {
           <a href="#why" onClick={closeMenu}>About</a>
           <a href="#reflections" onClick={closeMenu}>Reflections</a>
           <a href="#contact" onClick={closeMenu}>Contact</a>
-          <button className="nav-mobile-cta" onClick={() => { closeMenu(); document.getElementById("contact").scrollIntoView({behavior:"smooth"}); }}>Start a conversation</button>
+          <button className="nav-mobile-cta" onClick={() => { trackCTA("nav_mobile_start_conversation"); closeMenu(); document.getElementById("contact").scrollIntoView({behavior:"smooth"}); }}>Start a conversation</button>
         </div>
       </div>
     </nav>
@@ -597,11 +596,11 @@ function Hero() {
         </h1>
         <p className="hero-body">Fifteen years across Amul, Swiggy, The/Nudge, and LetsTransport — now helping founders, CXOs, and leadership teams navigate the decisions that don't show up in a playbook.</p>
         <div className="hero-actions">
-          <button className="btn-primary" onClick={() => document.getElementById("contact").scrollIntoView({behavior:"smooth"})}>
+          <button className="btn-primary" onClick={() => { trackCTA("hero_start_conversation"); document.getElementById("contact").scrollIntoView({behavior:"smooth"}); }}>
             Start a conversation
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
-          <button className="btn-ghost" onClick={() => document.getElementById("services").scrollIntoView({behavior:"smooth"})}>See how I work</button>
+          <button className="btn-ghost" onClick={() => { trackCTA("hero_see_how_i_work"); document.getElementById("services").scrollIntoView({behavior:"smooth"}); }}>See how I work</button>
         </div>
       </div>
       <div className="hero-right">
@@ -766,18 +765,33 @@ function Why() {
     <section className="section-dark" id="why">
       <div className="wrap">
         <div className="why-inner">
-          <div className="why-left">
+          <div className="why-header">
             <span className="section-eyebrow">Why I do this work</span>
-            <h2 className="serif">Because I love doing it.</h2>
-            <div className="why-photo">
-              <img src="/Why%20I%20do%20this%20work.JPG" alt="Utsav at work" />
-            </div>
+            <h2 className="serif">The Work That Found Me</h2>
+          </div>
+          <div className="why-photo">
+            <img src="/Why%20I%20do%20this%20work.JPG" alt="Utsav at work" />
           </div>
           <div className="why-body">
-            <p>I always did well in school and college — but when confronted with the challenges of work life, I didn't feel equipped.</p>
-            <p>I came across problems whose solutions were never taught in school. They ranged from building trust in a team to designing teams for the future. I looked around for answers but nothing helped.</p>
-            <p>The leaders around me were improvising — without any standard solution. The case studies online lacked context and offered no practical guidance. I struggled, but kept trying different ways to coach my teams and help them deliver.</p>
-            <p>That experience helped me design a coaching methodology that is a unique blend of time-tested management principles and the pragmatic experience of leading people. I now share this with leaders, teams, and organisations who want to unlock their potential — not with a borrowed framework, but with something that actually fits their context.</p>
+            <p>When I was 22, I met Dr. Narendra Dabholkar, a man who dedicated his life to challenging blind faith in India.</p>
+            <p>I remember asking him a question that I thought deserved a profound answer: "Why do you do what you do?"</p>
+            <p>He smiled and said, "Mazaa aata hai" ("Because I enjoy doing it.")</p>
+            <p>I remember feeling almost disappointed. Surely there had to be a bigger reason, a nobler purpose, a grand philosophy.</p>
+            <p>But the older I've grown, the more I've realised how profound those few words really were. For a long time, I was too busy living life to understand them.</p>
+            <p>Like many of us, I chased what seemed like the obvious things to chase — good opportunities, meaningful work, better roles, bigger responsibilities. Every experience taught me something, and I'm grateful for all of them. But somewhere in the background, that question kept returning.</p>
+            <p>"What is it that gives me that kind of joy?"</p>
+            <p>Looking back now, I don't think I found the answer. I think the answer found me.</p>
+            <p>No matter where I worked, I found myself drawn to people. Their stories fascinated me. Why did two equally capable people respond so differently to the same setback? Why did some people come alive in their work while others slowly lost themselves? What helped one person grow while another stayed stuck?</p>
+            <p>Those questions interested me far more than they probably should have. Over time, something unexpected happened.</p>
+            <p>People started coming to me because they felt they could think more clearly after talking to me. Sometimes our conversations were about careers, sometimes about relationships, difficult decisions, or that vague feeling that something important was missing despite everything looking fine on paper.</p>
+            <p>I rarely felt the need to have answers. More often than not, I found myself asking questions — the kind that make us pause. Those conversations taught me as much as they helped the other person.</p>
+            <p>Every heartfelt "thank you," every message years later saying, "That conversation changed something for me," reminded me that there was something deeply meaningful about simply being present for another human being.</p>
+            <p>And if I'm honest — I genuinely enjoy it, and that joy eventually became my work.</p>
+            <p>Today, I work with founders, leaders and professionals who want success that doesn't come at the cost of themselves. People who care deeply about what they achieve, but also about who they become in the process.</p>
+            <p>Over the years, I've realised that lasting growth is rarely about learning one more framework or finding another productivity hack. It usually begins with understanding ourselves a little more honestly.</p>
+            <p>That's the spirit behind the WISE Framework (Will, Intensity, Synergy, Expertise) that guides my coaching. It's not a formula as much as it is a way of exploring the different dimensions of a meaningful life. Together, we make sense of what truly matters, notice where your energy is being drained, uncover the strengths that often go unnoticed, and build the capabilities needed to create the kind of impact you want to leave behind.</p>
+            <p>Sixteen years have passed since that conversation, and today, I finally understand what Dr. Dabholkar meant.</p>
+            <p>And with a smile, I find myself repeating the very words that stayed with me all these years: "Mazaa aata hai."</p>
           </div>
         </div>
       </div>
@@ -833,10 +847,23 @@ function Credentials() {
 function Reflections({ onOpenArticle, onReadAll }) {
   const reflections = useSupabaseList(
     "reflections",
-    (row) => ({ cat: row.category, pub: row.publication, title: row.title, desc: row.description, body: row.body || row.description, link: row.link }),
+    (row) => ({
+      cat: row.category, pub: row.publication, title: row.title, desc: row.description,
+      body: row.body || row.description, link: row.link,
+      isFavourite: !!row.is_favourite, favouritedAt: row.favourited_at, displayOrder: row.display_order ?? 0,
+    }),
     DEFAULT_REFLECTIONS
   );
-  const shown = reflections.slice(0, 6);
+  // Favourited pieces take the 6 homepage slots first, most-recently-favourited
+  // first (so favouriting a 7th bumps the oldest favourite off, not the newest).
+  // Any remaining slots fall back to normal display_order.
+  const favourites = reflections
+    .filter(r => r.isFavourite)
+    .sort((a, b) => new Date(b.favouritedAt || 0) - new Date(a.favouritedAt || 0));
+  const rest = reflections
+    .filter(r => !r.isFavourite)
+    .sort((a, b) => a.displayOrder - b.displayOrder);
+  const shown = [...favourites, ...rest].slice(0, 6);
   return (
     <section className="section" id="reflections">
       <div className="wrap">
@@ -849,7 +876,7 @@ function Reflections({ onOpenArticle, onReadAll }) {
         </div>
         <div className="ref-grid">
           {shown.map((r,i) => (
-            <div className="ref-card" key={i} onClick={() => onOpenArticle(r)} role="button" tabIndex={0} onKeyDown={e => e.key==="Enter" && onOpenArticle(r)}>
+            <div className="ref-card" key={i} onClick={() => { trackCTA("reflection_open"); onOpenArticle(r); }} role="button" tabIndex={0} onKeyDown={e => e.key==="Enter" && onOpenArticle(r)}>
               <span className="ref-cat">{r.cat}</span>
               <h4 className="serif">{r.title}</h4>
               <p>{r.desc}</p>
@@ -858,8 +885,8 @@ function Reflections({ onOpenArticle, onReadAll }) {
           ))}
         </div>
         <div className="ref-cta">
-          <button className="btn-outline" onClick={onReadAll}>Read all reflections</button>
-          <button className="btn-outline-clay" onClick={() => document.getElementById("newsletter").scrollIntoView({behavior:"smooth"})}>
+          <button className="btn-outline" onClick={() => { trackCTA("reflections_read_all"); onReadAll(); }}>Read all reflections</button>
+          <button className="btn-outline-clay" onClick={() => { trackCTA("reflections_receive_by_email"); document.getElementById("newsletter").scrollIntoView({behavior:"smooth"}); }}>
             Receive Reflections by email
           </button>
         </div>
@@ -881,6 +908,7 @@ function Newsletter() {
     const { error } = await supabase.from("subscribers").insert({ email });
     setSaving(false);
     if (error && !error.message.includes("duplicate")) { setErr("Something went wrong — please try again."); return; }
+    trackCTA("newsletter_subscribe");
     setDone(true);
   };
 
@@ -925,6 +953,7 @@ function Contact() {
     });
     setSending(false);
     if (error) { setError("Something went wrong — please try again or email directly."); return; }
+    trackCTA("contact_form_submit");
     setSent(true);
   };
 
@@ -1013,13 +1042,13 @@ function Footer() {
 function SocialFloat() {
   return (
     <div className="social-float">
-      <a className="social-float-item" href="https://www.linkedin.com/in/utsmis/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+      <a className="social-float-item" href="https://www.linkedin.com/in/utsmis/" target="_blank" rel="noreferrer" aria-label="LinkedIn" onClick={() => trackCTA("social_linkedin")}>
         <span className="social-float-label">LinkedIn</span>
         <span className="social-float-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
         </span>
       </a>
-      <a className="social-float-item" href="https://www.instagram.com/getrealwithutsav" target="_blank" rel="noreferrer" aria-label="Instagram">
+      <a className="social-float-item" href="https://www.instagram.com/getrealwithutsav" target="_blank" rel="noreferrer" aria-label="Instagram" onClick={() => trackCTA("social_instagram")}>
         <span className="social-float-label">Instagram</span>
         <span className="social-float-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
@@ -1033,8 +1062,13 @@ export default function UtsavHome() {
   const [page, setPage] = useState("home"); // "home" | "all-reflections" | "article"
   const [activeArticle, setActiveArticle] = useState(null);
 
+  useEffect(() => {
+    trackPageView();
+    return initScrollTracking();
+  }, [page]);
+
   if (page === "article" && activeArticle) {
-    return <ReflectionArticlePage article={activeArticle} onBack={() => setPage("home")} />;
+    return <ReflectionArticlePage article={activeArticle} onBack={() => setPage("all-reflections")} />;
   }
   if (page === "all-reflections") {
     return <ReflectionsAllPage onBack={() => setPage("home")} onOpenArticle={a => { setActiveArticle(a); setPage("article"); }} />;

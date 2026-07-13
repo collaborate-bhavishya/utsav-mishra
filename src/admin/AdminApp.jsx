@@ -3,9 +3,15 @@ import { supabase } from "../lib/supabase";
 import Login from "./Login";
 import ResourceEditor from "./ResourceEditor";
 import LeadsInbox from "./LeadsInbox";
+import AnalyticsPanel from "./AnalyticsPanel";
 import "./admin.css";
 
 const TABS = [
+  {
+    key: "analytics",
+    label: "Analytics",
+    component: AnalyticsPanel,
+  },
   {
     key: "leads",
     label: "Leads",
@@ -40,6 +46,8 @@ const TABS = [
     table: "reflections",
     title: "Reflections",
     card: { titleKey: "title", subKey: "publication", textKey: "description" },
+    favoriteKey: "is_favourite",
+    favoriteLimit: 6,
     fields: [
       { key: "category", label: "Category", type: "select", options: [
         "Leadership & Workplace Culture",
@@ -101,7 +109,7 @@ export default function AdminApp() {
       <div className="admin-body">
         {tab.component
           ? <tab.component />
-          : <ResourceEditor table={tab.table} title={tab.title} fields={tab.fields} card={tab.card} />}
+          : <ResourceEditor table={tab.table} title={tab.title} fields={tab.fields} card={tab.card} favoriteKey={tab.favoriteKey} favoriteLimit={tab.favoriteLimit} />}
       </div>
     </div>
   );
