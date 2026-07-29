@@ -244,6 +244,7 @@ const css = `
 
   /* LOGOS */
   .logos { padding: 72px 0; background: #FFFFFF; border-bottom: 1px solid var(--line); }
+  .logos .wrap { padding-left: 40px; padding-right: 40px; }
   .logos .section-eyebrow { display: block; text-align: center; margin: 0 auto 40px; }
   .logos-row {
     display: grid;
@@ -255,15 +256,18 @@ const css = `
     margin: 0 auto;
   }
   .logo-item {
-    min-height: 88px;
+    min-height: 70px;
     display: flex; align-items: center; justify-content: center;
   }
   .logo-item img {
-    max-height: 80px; width: auto; max-width: 200px;
+    max-height: 60px; width: auto; max-width: 100%;
     object-fit: contain;
   }
-  .logo-item img[alt="Indian Air Force"] { max-height: 120px; max-width: 140px; }
-  @media (max-width: 720px) { .logos-row { grid-template-columns: repeat(2, 1fr); row-gap: 24px; column-gap: 20px; } }
+  .logo-item img[alt="Indian Air Force"] { max-height: 90px; max-width: 100px; }
+  @media (max-width: 720px) {
+    .logos .wrap { padding-left: 28px; padding-right: 28px; }
+    .logos-row { grid-template-columns: repeat(2, 1fr); row-gap: 24px; column-gap: 20px; }
+  }
   .logo-pill {
     background: rgba(26,36,32,0.06); border-radius: 3px; padding: 11px 22px;
     font-family: 'Fraunces', serif; font-size: 14px; color: var(--sage);
