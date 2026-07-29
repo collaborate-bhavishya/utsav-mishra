@@ -26,6 +26,7 @@ const css = `
     font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     line-height: 1.6;
+    overflow-x: hidden;
   }
   .um a { color: inherit; text-decoration: none; }
   .um button { cursor: pointer; font-family: inherit; }
@@ -162,7 +163,11 @@ const css = `
     pointer-events: none; z-index: 3;
   }
   @media (max-width: 860px) {
-    .hero { grid-template-columns: 1fr; min-height: auto; }
+    .hero {
+      grid-template-columns: 1fr;
+      height: auto; min-height: auto; max-height: none;
+      overflow: visible;
+    }
     .hero::before { display: none; }
     .hero::after { display: none; }
   }
@@ -176,7 +181,7 @@ const css = `
   }
   .hero-left > * { max-width: 480px; }
   @media (max-width: 1100px) { .hero-left { padding: 40px 36px 40px 40px; } }
-  @media (max-width: 860px) { .hero-left { padding: 100px 24px 32px; align-items: flex-start; } .hero-left > * { max-width: 100%; } }
+  @media (max-width: 860px) { .hero-left { padding: 40px 24px 32px; align-items: flex-start; } .hero-left > * { max-width: 100%; } }
 
   .hero-left .eyebrow { margin-bottom: 22px; }
 
@@ -290,6 +295,7 @@ const css = `
   .photo-strip { height: 380px; overflow: hidden; position: relative; background: var(--sand); }
   .photo-strip img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.78) brightness(0.96); }
   .photo-caption { position: absolute; bottom: 20px; right: 28px; font-size: 12px; color: rgba(255,255,255,0.65); font-style: italic; }
+  @media (max-width: 600px) { .photo-strip { height: 220px; } }
 
   /* TESTIMONIALS — single-card carousel */
   .testi-eyebrow {
@@ -466,6 +472,7 @@ const css = `
   .contact-intro h2 { font-family: 'Fraunces', serif; font-size: clamp(28px,3.5vw,44px); font-weight: 400; line-height: 1.15; margin-top: 18px; }
   .contact-intro p { color: var(--sage); font-size: 17px; margin-top: 14px; line-height: 1.65; max-width: 520px; margin-left: auto; margin-right: auto; }
   .form-card { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 44px; }
+  @media (max-width: 600px) { .form-card { padding: 28px 22px; } }
   .field { margin-bottom: 20px; }
   .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
   .field input, .field textarea { width: 100%; padding: 13px 16px; border-radius: 5px; border: 1px solid var(--line); font-size: 15px; font-family: inherit; background: var(--paper); color: var(--ink); transition: border-color 0.2s; }
@@ -551,9 +558,9 @@ function Nav() {
 
   return (
     <nav className={`nav${scrolled ? " scrolled" : ""}${menuOpen ? " menu-active" : ""}`}>
-      <div className="nav-logo">
+      <a className="nav-logo" href="#" onClick={e => { e.preventDefault(); closeMenu(); window.scrollTo({top:0, behavior:"smooth"}); }}>
         <img src="/brown transparent .png" alt="Utsav Mishra" />
-      </div>
+      </a>
       <div className="nav-links">
         <a href="#services">Work</a>
         <a href="#why">About</a>
