@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSupabaseList } from "./lib/useSupabaseList";
 import { supabase } from "./lib/supabase";
 import { trackPageView, trackCTA, initScrollTracking } from "./lib/analytics";
+import { slugify } from "./lib/slugify";
 import ReflectionsAllPage from "./ReflectionsAllPage";
 import ReflectionArticlePage from "./ReflectionArticlePage";
 
@@ -1069,20 +1070,67 @@ function SocialFloat() {
   );
 }
 
+const SITE_TITLE = "Utsav Mishra — Executive Coach, Leadership Advisor & Speaker";
+
+function resolveRoute() {
+  const path = window.location.pathname;
+  const articleMatch = path.match(/^\/reflections\/([^/]+)\/?$/);
+  if (articleMatch) return { page: "article", slug: decodeURIComponent(articleMatch[1]) };
+  if (path === "/reflections" || path === "/reflections/") return { page: "all-reflections", slug: null };
+  return { page: "home", slug: null };
+}
+
 export default function UtsavHome() {
-  const [page, setPage] = useState("home"); // "home" | "all-reflections" | "article"
-  const [activeArticle, setActiveArticle] = useState(null);
+  // Fetched here (in addition to Reflections()/ReflectionsAllPage's own fetches)
+  // so a direct visit to /reflections/:slug can resolve which article that is
+  // before the user has clicked anything.
+  const allReflections = useSupabaseList(
+    "reflections",
+    (row) => ({
+      cat: row.category, pub: row.publication, title: row.title, desc: row.description,
+      body: row.body || row.description, link: row.link,
+    }),
+    DEFAULT_REFLECTIONS
+  );
+
+  const [route, setRoute] = useState(resolveRoute);
+  const { page, slug } = route;
+  const activeArticle = page === "article"
+    ? allReflections.find(r => slugify(r.title) === slug) || null
+    : null;
+
+  const navigate = (path, next) => {
+    window.history.pushState(null, "", path);
+    setRoute(next);
+    window.scrollTo(0, 0);
+  };
+  const goHome = () => navigate("/", { page: "home", slug: null });
+  const goAllReflections = () => navigate("/reflections", { page: "all-reflections", slug: null });
+  const goArticle = (article) => navigate(`/reflections/${slugify(article.title)}`, { page: "article", slug: slugify(article.title) });
+
+  useEffect(() => {
+    const onPopState = () => setRoute(resolveRoute());
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   useEffect(() => {
     trackPageView();
     return initScrollTracking();
   }, [page]);
 
-  if (page === "article" && activeArticle) {
-    return <ReflectionArticlePage article={activeArticle} onBack={() => setPage("all-reflections")} />;
+  useEffect(() => {
+    if (page === "article") document.title = activeArticle ? `${activeArticle.title} — Utsav Mishra` : SITE_TITLE;
+    else if (page === "all-reflections") document.title = `Reflections — Utsav Mishra`;
+    else document.title = SITE_TITLE;
+  }, [page, activeArticle]);
+
+  if (page === "article") {
+    if (!activeArticle) return <div style={{minHeight:"60vh"}} />;
+    return <ReflectionArticlePage article={activeArticle} onBack={goAllReflections} />;
   }
   if (page === "all-reflections") {
-    return <ReflectionsAllPage onBack={() => setPage("home")} onOpenArticle={a => { setActiveArticle(a); setPage("article"); }} />;
+    return <ReflectionsAllPage onBack={goHome} onOpenArticle={goArticle} />;
   }
 
   return (
@@ -1104,8 +1152,8 @@ export default function UtsavHome() {
         alt="Speaking at TEDx"
       />
       <Reflections
-        onOpenArticle={a => { setActiveArticle(a); setPage("article"); }}
-        onReadAll={() => setPage("all-reflections")}
+        onOpenArticle={goArticle}
+        onReadAll={goAllReflections}
       />
       <Newsletter />
       <Contact />
